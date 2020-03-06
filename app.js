@@ -94,10 +94,6 @@ const newInternQuestions = [
     }
 ];
 
-// const newTeamMemberQuestions = [
-// 	{ type: 'list', name: 'role', message: 'What is their role?', choices: ['Engineer', 'Intern'] }
-// ];
-
 const initTeam = () => {
     inquirer.prompt(initTeamQuestions).then(function(data) {
         console.log(data);
@@ -107,18 +103,9 @@ const initTeam = () => {
             data.email,
             data.officeNumber
         );
-        // console.log(manager);
-        allEmployees.push(manager);
-        // console.log(allEmployees);
 
-        if (data.addTeamMember === "engineer") {
-            addNewEngineer();
-        } else if (data.addTeamMember === "intern") {
-            addNewIntern();
-        } else {
-            console.log("Building your html templates based on team information...");
-            // Do html render stuff
-        }
+        allEmployees.push(manager);
+        determineNextStep(data);
     });
 };
 
@@ -130,63 +117,48 @@ const addNewEngineer = () => {
             data.email,
             data.github
         );
-        allEmployees.push(engineer);
 
-        if (data.addTeamMember === "engineer") {
-            addNewEngineer();
-        } else if (data.addTeamMember === "intern") {
-            addNewIntern();
-        }
+        allEmployees.push(engineer);
+        determineNextStep(data);
     });
 };
 
 const addNewIntern = () => {
     inquirer.prompt(newInternQuestions).then(function(data) {
-        const intern = new Engineer(
+        const intern = new Intern(
             data.name,
             data.id,
             data.email,
             data.school
         );
-        allEmployees.push(intern);
 
-        if (data.addTeamMember === "engineer") {
-            addNewEngineer();
-        } else if (data.addTeamMember === "intern") {
-            addNewIntern();
-        }
+        allEmployees.push(intern);
+        determineNextStep(data);
     });
 };
 
+const determineNextStep = (data) => {
+    if (data.addTeamMember === "engineer") {
+        addNewEngineer();
+    } else if (data.addTeamMember === "intern") {
+        addNewIntern();
+    } else {
+        console.log("Building your html templates based on team information...");
+        generateTeamPage();
+    }
+}
+
+const generateTeamPage = () => {
+    const htmlString = render(allEmployees);
+    console.log(htmlString)
+
+    fs.writeFile(outputPath, htmlString, function(err) {
+        if (err) {
+            return console.log(err);
+        }
+    
+        console.log("Success! View the generated team page in the output folder.");
+    });
+}
+
 initTeam();
-
-// fs.writeFile(filename, JSON.stringify(data, null, "\t"), function(err) {
-//     if (err) {
-//         return console.log(err);
-//     }
-
-//     console.log("Success!");
-// });
-
-// Write code to use inquirer to gather information about the development team members,
-// and to create objects for each team member (using the correct classes as blueprints!)
-
-// After the user has input all employees desired, call the `render` function (required
-// above) and pass in an array containing all employee objects; the `render` function will
-// generate and return a block of HTML including templated divs for each employee!
-
-// After you have your html, you're now ready to create an HTML file using the HTML
-// returned from the `render` function. Now write it to a file named `team.html` in the
-// `output` folder. You can use the variable `outputPath` above target this location.
-// Hint: you may need to check if the `output` folder exists and create it if it
-// does not.
-
-// HINT: each employee type (manager, engineer, or intern) has slightly different
-// information; write your code to ask different questions via inquirer depending on
-// employee type.
-
-// HINT: make sure to build out your classes first! Remember that your Manager, Engineer,
-// and Intern classes should all extend from a class named Employee; see the directions
-// for further information. Be sure to test out each class and verify it generates an
-// object with the correct structure and methods. This structure will be crucial in order
-// for the provided `render` function to work!```
