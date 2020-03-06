@@ -12,33 +12,162 @@ const render = require("./lib/htmlRenderer");
 
 const allEmployees = [];
 
-const questions = [
-	{ type: 'input', name: 'name', message: 'What is the employee\'s name?' },
-    { type: 'input', name: 'id', message: 'What is their ID?'},
-    { type: 'input', name: 'email', message: 'What is their email?' },
-    { type: 'list', name: 'role', message: 'What is their role?', choices: ['Manager', 'Engineer', 'Intern'] },
-    { type: 'input', name: 'officeNumber', message: 'What is your office number?' },
-	{ type: 'input', name: 'github', message: 'What is your GitHub username?' },
-	{ type: 'input', name: 'school', message: 'What school do you attend?' }
+const initTeamQuestions = [
+    { type: "input", name: "name", message: "What is the manager's name?" },
+    { type: "input", name: "id", message: "What is the manager's ID?" },
+    { type: "input", name: "email", message: "What is the manager's email?" },
+    { type: "input", name: "officeNumber", message: "What is their office number?" },
+    {
+        type: "list",
+        name: "addTeamMember",
+        message: "Would you like to add another team member?",
+        choices: [
+            {
+                name: "Yes, let's add an engineer",
+                value: "engineer"
+            },
+            {
+                name: "Yes, let's add an intern",
+                value: "intern"
+            },
+            {
+                name: "No, there are no additional team members",
+                value: "no"
+            }
+        ]
+    }
 ];
 
-inquirer
-    .prompt(questions)
-    .then(function(data) {
-        var filename =
-            data.name
-                .toLowerCase()
-                .split(" ")
-                .join("") + ".json";
-
-        fs.writeFile(filename, JSON.stringify(data, null, "\t"), function(err) {
-            if (err) {
-                return console.log(err);
+const newEngineerQuestions = [
+    { type: "input", name: "name", message: "What is the engineer's name?" },
+    { type: "input", name: "id", message: "What is the engineer's ID?" },
+    { type: "input", name: "email", message: "What is the engineer's email?" },
+    {
+        type: "input",
+        name: "github",
+        message: "What is their GitHub username?"
+    },
+    {
+        type: "list",
+        name: "addTeamMember",
+        message: "Would you like to add another team member?",
+        choices: [
+            {
+                name: "Yes, let's add an engineer",
+                value: "engineer"
+            },
+            {
+                name: "Yes, let's add an intern",
+                value: "intern"
+            },
+            {
+                name: "No, there are no additional team members",
+                value: "no"
             }
+        ]
+    }
+];
 
-            console.log("Success!");
-        });
+const newInternQuestions = [
+    { type: "input", name: "name", message: "What is the intern's name?" },
+    { type: "input", name: "id", message: "What is the intern's ID?" },
+    { type: "input", name: "email", message: "What is the intern's email?" },
+    { type: "input", name: "school", message: "What school do they attend?" },
+    {
+        type: "list",
+        name: "addTeamMember",
+        message: "Would you like to add another team member?",
+        choices: [
+            {
+                name: "Yes, let's add an engineer",
+                value: "engineer"
+            },
+            {
+                name: "Yes, let's add an intern",
+                value: "intern"
+            },
+            {
+                name: "No, there are no additional team members",
+                value: "no"
+            }
+        ]
+    }
+];
+
+// const newTeamMemberQuestions = [
+// 	{ type: 'list', name: 'role', message: 'What is their role?', choices: ['Engineer', 'Intern'] }
+// ];
+
+const initTeam = () => {
+    inquirer.prompt(initTeamQuestions).then(function(data) {
+        console.log(data);
+        const manager = new Manager(
+            data.name,
+            data.id,
+            data.email,
+            data.officeNumber
+        );
+        // console.log(manager);
+        allEmployees.push(manager);
+        // console.log(allEmployees);
+
+        if (data.addTeamMember === "engineer") {
+            addNewEngineer();
+        } else if (data.addTeamMember === "intern") {
+            addNewIntern();
+        } else {
+            console.log("Building your html templates based on team information...");
+            // Do html render stuff
+        }
     });
+};
+
+const addNewEngineer = () => {
+    inquirer.prompt(newEngineerQuestions).then(function(data) {
+        const engineer = new Engineer(
+            data.name,
+            data.id,
+            data.email,
+            data.github
+        );
+        allEmployees.push(engineer);
+
+        if (data.addTeamMember === "engineer") {
+            addNewEngineer();
+        } else if (data.addTeamMember === "intern") {
+            addNewIntern();
+        }
+    });
+};
+
+const addNewIntern = () => {
+    inquirer.prompt(newInternQuestions).then(function(data) {
+        const intern = new Engineer(
+            data.name,
+            data.id,
+            data.email,
+            data.school
+        );
+        allEmployees.push(intern);
+
+        if (data.addTeamMember === "engineer") {
+            addNewEngineer();
+        } else if (data.addTeamMember === "intern") {
+            addNewIntern();
+        }
+    });
+};
+
+initTeam();
+
+// fs.writeFile(filename, JSON.stringify(data, null, "\t"), function(err) {
+//     if (err) {
+//         return console.log(err);
+//     }
+
+//     console.log("Success!");
+// });
+
 // Write code to use inquirer to gather information about the development team members,
 // and to create objects for each team member (using the correct classes as blueprints!)
 
